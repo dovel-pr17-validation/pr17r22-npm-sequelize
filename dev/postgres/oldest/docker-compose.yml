@@ -1,0 +1,28 @@
+services:
+  postgres-oldest:
+    container_name: sequelize-postgres-oldest
+    image: postgis/postgis:11-2.5
+    environment:
+      POSTGRES_USER: sequelize_test
+      POSTGRES_PASSWORD: sequelize_test
+      POSTGRES_DB: sequelize_test
+    ports:
+      - 23010:5432
+    volumes:
+      - postgres-oldest:/var/lib/postgresql/data
+    healthcheck:
+      # -h forces a TCP probe. During initdb the entrypoint runs a temporary server that only
+      # listens on the unix socket, so a socket probe reports healthy before the real server is up.
+      test: ['CMD', 'pg_isready', '-h', '127.0.0.1', '-U', 'sequelize_test', '-d', 'sequelize_test']
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+networks:
+  default:
+    name: sequelize-postgres-oldest-network
+
+volumes:
+  postgres-oldest:
+    name: sequelize-postgres-oldest-volume

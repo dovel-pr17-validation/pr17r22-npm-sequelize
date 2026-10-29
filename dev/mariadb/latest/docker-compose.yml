@@ -1,0 +1,39 @@
+services:
+  mariadb-latest:
+    container_name: sequelize-mariadb-latest
+    image: mariadb:11.6.2
+    environment:
+      MYSQL_DATABASE: sequelize_test
+      MYSQL_USER: sequelize_test
+      MYSQL_PASSWORD: sequelize_test
+      MYSQL_ROOT_PASSWORD: sequelize_test
+    ports:
+      - 21103:3306
+    volumes:
+      - mariadb-latest:/var/lib/mysql
+    healthcheck:
+      # --protocol=TCP forces a TCP probe. During initialisation the entrypoint runs a temporary
+      # server with --skip-networking, so a socket probe reports healthy before the real server is up.
+      test:
+        [
+          'CMD',
+          'mariadb-admin',
+          '--protocol=TCP',
+          '-h',
+          '127.0.0.1',
+          '-usequelize_test',
+          '-psequelize_test',
+          'status',
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+networks:
+  default:
+    name: sequelize-mariadb-latest-network
+
+volumes:
+  mariadb-latest:
+    name: sequelize-mariadb-latest-volume
